@@ -1,6 +1,6 @@
 # office-retro
 
-办公类 AI agent 的会话复盘 Skill。适用于千问办公（QwenWork）、豆包工作、WorkBuddy、Trae、ChatGPT work 等办公 agent。
+办公类 AI agent 的会话复盘 Skill。适用于千问办公（QwenWork）、豆包工作、WorkBuddy、Trae、ChatGPT work、Qoder 等办公 agent。
 
 对一次办公会话做复盘：从**记忆、Skill、确定性门禁、连接器与工具、定时任务、信息获取、导航**七个类目中找环境改进候选，按严重度呈现，用户逐项确认后才落地。每条候选必须可溯源到具体证据。
 
@@ -14,6 +14,7 @@
 |---|---|---|
 | 千问办公 QwenWork | `~/.qwenworkcn/skills/` | 已验证 |
 | WorkBuddy | `~/.workbuddy/skills/` | 已验证 |
+| Qoder CN（Desktop/IDE/CLI） | `~/.qoder-cn/skills/` | 已验证 |
 | Trae / 豆包工作 / ChatGPT work 等 | 见产品设置/帮助 | 待验证 |
 
 ```bash
@@ -46,4 +47,5 @@ cp -r office-retro/office-retro ~/.qwenworkcn/skills/   # 以千问办公为例
 
 ## 版本
 
+- 2.1.0：新增 Qoder CN 适配行（意识文件/技能目录/记忆/定时任务四类入口本机验证），补充会话记录位置、hooks/MCP 配置面与 qoder_cron 要点。
 - 2.0.0：办公版首发。七类目办公化，新增环境适配表与自我改进路线。

@@ -1,8 +1,8 @@
 ---
 name: office-retro
-description: "对办公类 agent（千问办公、豆包工作、WorkBuddy、Trae、ChatGPT work 等）的一次会话做复盘：从记忆、Skill、门禁、连接器、定时任务、信息获取中找改进候选，按严重度呈现，用户确认后落地。用户说「复盘」「retro」「office-retro」「回顾这次会话」时使用。"
+description: "对办公类 agent（千问办公、豆包工作、WorkBuddy、Trae、ChatGPT work、Qoder 等）的一次会话做复盘：从记忆、Skill、门禁、连接器、定时任务、信息获取中找改进候选，按严重度呈现，用户确认后落地。用户说「复盘」「retro」「office-retro」「回顾这次会话」时使用。"
 disable-model-invocation: true
-version: 2.0.0
+version: 2.1.0
 ---
 
 用户要求对一次**办公会话**做复盘。你的产出是 agent **环境**的改进候选：让下一次运行更顺，而不是替用户重做这次工作。
@@ -35,9 +35,17 @@ version: 2.0.0
 |---|---|---|---|---|---|
 | 千问办公 QwenWork | ~/.qwenworkcn/awareness/main/（AGENTS/SOUL/USER/MEMORY.md） | ~/.qwenworkcn/skills/ | awareness/main/memory/ 日志 + memory 工具 | qwenwork_cron_manage_job / automation_manage_rule 工具 | 已验证（2026-11） |
 | WorkBuddy | ~/.workbuddy/ 下配置 | ~/.workbuddy/skills/ | 待验证 | 应用内自动化/事件触发 | 技能目录已验证（2026-10-29），其余待验证 |
+| Qoder CN（Desktop/IDE/CLI 共用） | ~/.qoder-cn/AGENTS.md（全局）+ 项目根 AGENTS.md | ~/.qoder-cn/skills/ | ~/.qoder-cn/memory/（MEMORY.md 索引 + 主题文件，常驻注入）；项目级 projects/<slug>/memory/ | qoder_cron 工具（local/cloud） | 已验证（2026-11-13） |
 | Trae / 豆包工作 / ChatGPT work 等 | 待验证 | 待验证 | 待验证 | 待验证 | 未验证 |
 
 待验证产品的探测顺序：先读该产品的设置/帮助确定配置根目录，再依次确认四类入口；确认不了就问用户，把猜测写进表里是禁止的。验证一行后更新本表并递增版本号。
+
+Qoder 的一手材料与配置面（2026-11-13 本机验证）：
+
+- 会话记录在 `~/.qoder-cn/projects/<工作区slug>/<sessionId>.jsonl`（Claude Code 兼容格式）；子代理转录在同名目录 `subagents/agent-*.jsonl`。slug 是工作区绝对路径把分隔符与非 ASCII 字符换成 `-`，按它定位当前会话。
+- `~/.qoder-cn/settings.json`：`hooks` 走 Claude Code 契约（SessionStart / UserPromptSubmit / PreToolUse / PostToolUse / Stop 等，stdin JSON），确定性门禁可落成 hook 脚本；MCP 连接器在同文件 `mcpServers`。
+- 定时任务用内置 `qoder_cron` 工具。cloud 任务不继承本地工作区、工具与插件；本地任务的模型在创建时固化，不随后续会话变化。
+- 国际版根目录 `~/.qoder`（AGENTS.md、skills/、settings.json 已确认存在），自动记忆与会话记录未验证。
 
 ### 执行与复盘的分工
 
