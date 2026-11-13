@@ -13,7 +13,7 @@
 | 产品 | 技能目录 / 入口 | 验证状态 |
 |---|---|---|
 | 千问办公 QwenWork | `~/.qwenworkcn/skills/` | 已验证 |
-| WorkBuddy | `~/.workbuddy/skills/` | 已验证 |
+| WorkBuddy | `~/.workbuddy/skills/`（用户级）、`<工作区>/.workbuddy/skills/`（项目级）；或「专家·技能·连接器 → 技能 → 添加技能 → 上传技能」 | 已验证（2026-11-13，macOS 客户端） |
 | Qoder CN（Desktop/IDE/CLI） | `~/.qoder-cn/skills/` | 已验证 |
 | 豆包工作（工作任务模式） | 设置页「插件·技能·伙伴 → 技能 → ＋ 添加 → 上传技能」；或投放到 `~/Library/Application Support/Doubao/Default/.doubao/agent_mode/workspace/.user_skills/` | 已验证（2026-11-13，macOS 2.36.6） |
 | 豆包（对话模式） | 不加载技能目录，用法见下节 | 不适用 |
@@ -22,6 +22,7 @@
 ```bash
 git clone https://github.com/ScoFan-official/office-retro.git
 cp -r office-retro/office-retro ~/.qwenworkcn/skills/   # 以千问办公为例：目录投放
+cp -r office-retro/office-retro ~/.workbuddy/skills/    # WorkBuddy 用户级
 ```
 
 豆包工作更推荐走设置页上传：平台会记住调用参数，且上传的技能与 `user_skills` 目录在本地电脑和云电脑两侧都可用。不要投进 `.../workspace/.skills/`——那是应用内置技能目录，由应用维护、会随客户端版本变化。
@@ -50,6 +51,22 @@ cp -r office-retro/office-retro ~/.qwenworkcn/skills/   # 以千问办公为例�
 
 细节（安装三条入口、记忆五层、定时任务云端/本地口径、门禁与权限、运行位置差异、未验证项）见 [`office-retro/references/doubao.md`](office-retro/references/doubao.md)。
 
+## WorkBuddy 适配（v2.3.0）
+
+- 安装后到「专家·技能·连接器 → 技能 → 已安装」确认开关为启用；关闭的技能在新会话停止参与调用，开关状态记录在 `~/.workbuddy/settings.json` 的 `skillOverrides`。
+- 复盘时先跑只读环境探测，输出作为入口证据：
+
+```bash
+cd ~/.workbuddy/skills/office-retro
+python3 scripts/workbuddy_env_probe.py             # Markdown 证据表
+python3 scripts/workbuddy_env_probe.py --json      # 结构化输出
+python3 scripts/workbuddy_env_probe.py --strict    # 存在缺失项时退出码 1
+```
+
+`WORKBUDDY_HOME`、`WORKBUDDY_WORKSPACE` 覆盖默认路径；在复盘的目标工作区运行，或用 `--workspace` 指定。
+- 建议 Plan 模式 + 默认权限承载逐项确认，改动落地后用结果区「变更」回读；定时任务类候选以「定时任务 → 运行记录」的失败原因为证据。
+- 官方依据：[技能](https://www.workbuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Function-Description/Skills-Market)、[记忆](https://www.workbuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Function-Description/Memory)、[连接器](https://www.workbuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Function-Description/Connector)、[定时任务](https://www.workbuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Function-Description/Automation-Guide)、[工作模式与权限](https://www.workbuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Function-Description/Task-Bar)、[结果查看](https://www.workbuddy.cn/docs/workbuddy/Results)。环境入口、一手材料与七类目检查点见 [`office-retro/references/workbuddy.md`](office-retro/references/workbuddy.md)。
+
 ## 使用
 
 对 agent 说「复盘」「retro」或调用 `/office-retro`（仅用户主动触发，模型不会自行发起；不支持该字段的产品靠 description 措辞兜底）。可指定复盘某次历史会话，不指定则默认当前会话。
@@ -58,7 +75,7 @@ cp -r office-retro/office-retro ~/.qwenworkcn/skills/   # 以千问办公为例�
 
 1. 判定形态（工作模式 / 对话模式），并说明本次能做到的深度。
 2. 读一手材料（会话记录、运行日志、交付物、常驻指令与记忆），每条候选附证据。
-3. 按环境适配表确认当前产品的配置入口与运行位置（本地 / 云）。
+3. 按环境适配表确认当前产品的配置入口与运行位置（本地 / 云）；WorkBuddy 上先跑 `scripts/workbuddy_env_probe.py`，用输出作为入口证据。
 4. 七类目逐一检查，无发现的类目写「无」。
 5. 按严重度排序呈现候选，用户逐项拍板后执行，执行后回读验证；对话模式下改为给出可执行的手动步骤。
 6. 自我改进检查：区分**通用能力改进**与**专属适配改进**，经确认后修订本 Skill 并递增版本号。
@@ -68,12 +85,13 @@ cp -r office-retro/office-retro ~/.qwenworkcn/skills/   # 以千问办公为例�
 在任意办公 agent 里跑一次复盘，按 SKILL.md 步骤 5 产出改进：
 
 - **通用能力改进**：类目、步骤、门禁方法，对所有产品生效。
-- **专属适配改进**：环境适配表新增/修正一行，只对该产品生效。同一产品分形态时拆成两行，不合成一行。适配表禁止写入未验证的猜测路径；验证后更新并注明日期与验证范围（哪一侧验过）。
+- **专属适配改进**：环境适配表新增/修正一行，只对该产品生效。同一产品分形态时拆成两行，不合成一行。适配表禁止写入未验证的猜测路径；验证后更新并注明日期与验证范围（哪一侧验过）。WorkBuddy 的检查点与 `scripts/workbuddy_env_probe.py` 同步核对。
 
 提 PR 时请附：改进类别、触发它的会话证据、在哪个产品（哪一侧环境）上验证过。
 
 ## 版本
 
+- 2.3.0：补全 WorkBuddy 适配。环境适配表对应行由「待验证」改为官方文档 8 页 + macOS 客户端实测的入口清单；新增 `references/workbuddy.md`（证据来源、一手材料、七类目检查点）与只读探测脚本 `scripts/workbuddy_env_probe.py`；复盘流程补上 WorkBuddy 的环境探测、七类目复核，以及 Plan 模式 + 默认权限 + 结果区「变更」回读。保留 v2.1.0 Qoder CN 与 v2.2.0 豆包双形态改动。
 - 2.2.0：豆包 / 豆包工作拆成两行适配（工作模式四类入口本机验证，对话模式写明约束面）；新增 `references/doubao.md` 与 README「两种模式分开用」；复盘流程加「判定运行形态」一步，候选落地区分「已执行」与「手动步骤」；记录豆包工作的常驻预算（偏好指令 10,000 字符）、记忆五层、本地/云隔离与无 hooks 面。
 - 2.1.0：新增 Qoder CN 适配行（意识文件/技能目录/记忆/定时任务四类入口本机验证），补充会话记录位置、hooks/MCP 配置面与 qoder_cron 要点。
 - 2.0.0：办公版首发。七类目办公化，新增环境适配表与自我改进路线。

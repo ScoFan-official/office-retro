@@ -2,7 +2,7 @@
 name: office-retro
 description: "对办公类 agent（豆包工作、千问办公、WorkBuddy、Trae、ChatGPT work、Qoder 等）的一次会话做复盘：从确定性门禁、Skill 覆盖、记忆与常驻指令、连接器与工具、定时任务、信息获取、导航七个类目找改进候选，按严重度呈现，用户确认后才落地。仅在用户明确说「复盘」「retro」「office-retro」「回顾这次会话」时使用，不要自行发起。"
 disable-model-invocation: true
-version: 2.2.0
+version: 2.3.0
 ---
 
 用户要求对一次**办公会话**做复盘。你的产出是 agent **环境**的改进候选：让下一次运行更顺，而不是替用户重做这次工作。
@@ -22,8 +22,9 @@ version: 2.2.0
 2. **确认运行环境。** 查「环境适配表」确定当前产品的常驻指令入口、技能目录、记忆、定时任务。表中没有或标「待验证」的，按探测顺序现场确认，并把结果作为适配改进候选（见步骤 5）。
    - 同一产品还有**运行位置**之分（本地电脑 / 云电脑、个人 / 企业空间）：技能、文件、登录态不互通。先确认这次跑在哪一侧，别把另一侧的路径当作现状。
    - 证据不在本侧时（例如在云电脑复盘一次本地会话），明确写出「本侧看不到 X，需要切到 Y 侧再跑」，不要把缺失当成「无」。完成标准：入口与运行位置都确认，或明确记录哪一类在该产品不存在。
+   - WorkBuddy 上先运行 `scripts/workbuddy_env_probe.py`，把输出的路径、计数、时间戳作为入口证据；脚本标 MISSING 的项单列为候选。
 
-3. **逐类目找候选。** 七个类目每个都要过一遍；没有发现的类目写「无」，跳过的类目视为未完成。
+3. **逐类目找候选。** 七个类目每个都要过一遍；没有发现的类目写「无」，跳过的类目视为未完成。工作模式下在 WorkBuddy 上按 `references/workbuddy.md` 的七类目检查点再过一遍，逐条记录命中或「无」。
 
 - **确定性门禁**：交付物有没有可脚本化的校验？文档发布后回读、表格数字核对、格式校验、发布前预检。先找环境里已有的检查（Skill 内脚本、现成校验命令），已存在但没接上或悄悄失效的检查本身就是发现。机械性问题（固定格式、路径、参数、数字口径）优先建脚本门禁，不写 prose 规则；判断性问题才进常驻指令。一条没有任何门禁的交付链路（如文档发布无回读验证）本身是发现，不是中性默认。_何时用_：agent 犯了脚本能拦住的错，或交付链路无门禁。
 - **Skill 覆盖与质量**：重复出现的手工流程是否该固化成 Skill？已有 Skill 是否踩了未记录的坑、命令过时、缺验证步骤？发现即提议 patch。_何时用_：同一流程第二次手工执行，或 Skill 指引与实际环境不符。
@@ -35,8 +36,9 @@ version: 2.2.0
 
 4. **按严重度排序呈现候选**（阻断 > 重复损耗 > 隐患），每条附证据、建议动作、落点（哪个文件 / 脚本 / 任务 / 设置项）。等用户逐项拍板后才执行改动；未经确认不改既有 Skill 与常量。执行后回读验证，报告实际状态。
    - 对话模式没有落地面：把每条候选改写成用户能直接做的动作（进哪个设置页、粘贴哪段文本、点哪个按钮），并明说「未执行」。完成标准：每个候选都被用户接受或否决；工作模式下被接受的已落地并验证，对话模式下已给出可执行的手动步骤。
+   - WorkBuddy 上建议用 **Plan 模式 + 默认权限**承载逐项拍板，改动落地后用结果区「变更」视图回读。
 
-5. **自我改进检查。** 本次若运行在非千问办公产品，或发现了新坑：把改进分成两类——**通用能力改进**（类目、步骤、门禁方法，对所有产品生效）与**专属适配改进**（适配表新增/修正一行，只对该产品生效）。向用户提议本 Skill 的修订内容，确认后更新并递增版本号。适配改进涉及本地 / 云两侧时，分别注明哪一侧验过、哪一侧没验。发布到 GitHub 后，其它产品的使用者按同样路线提交改进。完成标准：两类改进各自被提议或明确判定为无。
+5. **自我改进检查。** 本次若运行在非千问办公产品，或发现了新坑：把改进分成两类——**通用能力改进**（类目、步骤、门禁方法，对所有产品生效）与**专属适配改进**（适配表新增/修正一行，只对该产品生效）。向用户提议本 Skill 的修订内容，确认后更新并递增版本号。适配改进涉及本地 / 云两侧时，分别注明哪一侧验过、哪一侧没验。发布到 GitHub 后，其它产品的使用者按同样路线提交改进。完成标准：两类改进各自被提议或明确判定为无。WorkBuddy 的专属改动落在适配表对应行、`references/workbuddy.md` 与 `scripts/workbuddy_env_probe.py`。
 
 ## 参考
 
@@ -45,7 +47,7 @@ version: 2.2.0
 | 产品 | 形态 | 常驻指令 / 意识文件 | 技能目录 | 记忆 | 定时任务 | 验证状态 |
 |---|---|---|---|---|---|---|
 | 千问办公 QwenWork | 工作 | ~/.qwenworkcn/awareness/main/（AGENTS/SOUL/USER/MEMORY.md） | ~/.qwenworkcn/skills/ | awareness/main/memory/ 日志 + memory 工具 | qwenwork_cron_manage_job / automation_manage_rule 工具 | 已验证（2026-11） |
-| WorkBuddy | 工作 | ~/.workbuddy/ 下配置 | ~/.workbuddy/skills/ | 待验证 | 应用内自动化/事件触发 | 技能目录已验证（2026-10-29），其余待验证 |
+| WorkBuddy | 工作 | `~/.workbuddy/user-*-personal/{SOUL,IDENTITY,USER,MEMORY}.md`；另有 `~/.workbuddy/MEMORY.md` | `~/.workbuddy/skills/`（用户级）、`<工作区>/.workbuddy/skills/`（项目级）；启用开关在 `~/.workbuddy/settings.json` 的 `skillOverrides` | 产品记忆：设置 → 记忆（每晚更新、可编辑），支持历史会话检索；本地三层：云端长期画像注入、用户级 MEMORY.md、工作区 `.workbuddy/memory/` 日志与 MEMORY.md | 左侧「定时任务」页面：定时任务 / 运行记录两标签；配置含名称、提示词、模型·专家·技能·连接器、工作空间、权限、重复、时间、有效期、推送 | 已验证（2026-11-13，官方文档 8 页 + macOS 客户端实测） |
 | Qoder CN（Desktop/IDE/CLI 共用） | 工作 | ~/.qoder-cn/AGENTS.md（全局）+ 项目根 AGENTS.md | ~/.qoder-cn/skills/ | ~/.qoder-cn/memory/（MEMORY.md 索引 + 主题文件，常驻注入）；项目级 projects/<slug>/memory/ | qoder_cron 工具（local/cloud） | 已验证（2026-11-13） |
 | 豆包工作（工作任务模式：桌面端 / 豆包内工作入口 / 飞书内入口） | 工作 | 设置 → 工作模式设置 → 个性化 → 工作任务偏好指令（≤10,000 字符，任务发起时默认注入）；另有「工作记忆」开关 | `~/Library/Application Support/Doubao/Default/.doubao/agent_mode/workspace/.user_skills/`（自定义技能，跨本地/云同步）；同级 `.skills/` 是应用内置技能，勿投自定义技能 | 设置 → 记忆；设置 → 工作模式设置 → 个性化 → 工作记忆；会话级 `.sessions/<id>/memory/MEMORY.md`；工作区 `experience/*.md`；manage_preference / search_memory 工具 | `create_cron_job` 等（先读 doubao-cron-scheduler 技能），runtime_type 1 云端 / 2 本地 | 已验证（2026-11-13，macOS 客户端 2.36.6）；Windows 路径未验证 |
 | 豆包（对话模式） | 对话 | 无（无常驻指令入口） | 不加载技能目录（技能入口在「插件·技能·伙伴」，属工作侧） | 设置 → 记忆（自然语言管理，概率性、非确定性） | 无 | 已验证约束面（2026-11-13） |
@@ -72,6 +74,18 @@ Qoder 的一手材料与配置面（2026-11-13 本机验证）：
 
 安装方式、记忆分层、定时任务口径、运行位置差异与对话模式的具体做法见 `references/doubao.md`。
 
+WorkBuddy 的一手材料与配置面（2026-11-13 本机验证，官方文档 8 页）：
+
+- 会话记录在 `~/.workbuddy/projects/<编码工作区>/<uuid>.jsonl`（`type` / `id` / `sessionId` / `timestamp` / `meta`）；按天日志 `~/.workbuddy/logs/YYYY-MM-DD/*.log`；追踪 `~/.workbuddy/traces/<id>/trace_*.jsonl`；审计 `~/.workbuddy/audit-log/YYYY-MM-DD.jsonl`；任务清单 `~/.workbuddy/tasks/<uuid>/*.json`；会话元数据 `~/.workbuddy/sessions/*.json`；回滚 `~/.workbuddy/projects/*/*.file-rollback.ndjson`。
+- `~/.workbuddy/settings.json` 含 `hooks.UserPromptSubmit`（每轮注入上下文）与 `skillOverrides`（技能启用开关，`SKILL.md` 原文保持）；`~/.workbuddy/mcp.json` 为 `mcpServers` / `disabledMcpServers` 双层结构，自定义 MCP 新增后需在自定义连接器入口点「信任」。
+- 连接器状态随会话注入；授权失效由「重新连接」卡片处理，同一步骤自动重试一次；安全中心「工具管控」按 MCP 服务或工具粒度启停。
+- 定时任务「运行记录」按成功 / 失败 / 运行中筛选，失败原因含连接器未授权、登录失效、离线错过、模型排队重试耗尽；提示词自包含、工作空间与权限随任务保存；新建后先用「立即运行」试跑。
+- 结果区四视图「产物 / 网页 / 工作空间文件 / 变更」用于执行后回读；工作模式 Agent / Plan / Ask 与权限模式「默认权限 / 完全访问权限」分别承载执行与确认。
+- `scripts/workbuddy_env_probe.py` 只读探测 20 项入口，输出路径、计数、时间戳与结构元信息，凭据字段值留在配置文件内；`--strict` 在存在 MISSING 项时返回 1，可挂确定性门禁。
+- `disable-model-invocation: true` 在本机应用包内命中该字段名、24 个已装 Skill 使用该字段（2026-11-13 实测）。
+- 官方文档证据来源、环境入口表、一手材料表、七类目专属检查点与脚本用法见 `references/workbuddy.md`。
+
+
 ### 执行与复盘的分工
 
 执行会话的 agent 上下文压力最大：探索、产出、排错都在它身上。复盘者拿到的是记录和交付物，无需重新探索，上下文压力最小。所以判断性规则由复盘侧核对与沉淀，执行侧只保留导航指针和红线——往执行侧常驻文件里塞规则，挤占的是干活的上下文。
@@ -80,9 +94,9 @@ Qoder 的一手材料与配置面（2026-11-13 本机验证）：
 
 - 常驻区（AGENTS/MEMORY/偏好指令）：只放导航指针与红线，每一行都在花常驻上下文和字符上限。
 - Skill：流程性知识与用户主动调用的命令；description 常驻，正文按需加载，措辞按 writing-for-agents（若该产品装有此 Skill 先读它）。
-- 脚本：机械性校验一律落成脚本，挂进 Skill 或任务，可重复执行。
+- 脚本：机械性校验一律落成脚本，挂进 Skill 或任务，可重复执行。WorkBuddy 上随技能目录分发 `scripts/`，配置与开关落在 `settings.json` 的 `skillOverrides` / hooks、`mcp.json` 与定时任务页面。
 - 先找已有文档与 Skill 再新建，同一含义只留一个权威位置。
 
 ### 发布与贡献
 
-本 Skill 以 GitHub 仓库（ScoFan-official/office-retro）分发，仓库含 SKILL.md、references/ 与 README.md。安装：把技能目录复制到目标产品的技能目录，或在有技能商店/上传入口的产品里直接上传（见适配表）。贡献：在目标产品里跑一次复盘，按步骤 5 产出通用或适配改进，经使用者确认后提交。
+本 Skill 以 GitHub 仓库（ScoFan-official/office-retro）分发，仓库含 SKILL.md、references/、scripts/ 与 README.md。安装：把技能目录复制到目标产品的技能目录，或在有技能商店/上传入口的产品里直接上传（见适配表）。贡献：在目标产品里跑一次复盘，按步骤 5 产出通用或适配改进，经使用者确认后提交；适配表与产品注记中的路径以官方文档或本机实测为准，并注明验证日期与验证范围。
